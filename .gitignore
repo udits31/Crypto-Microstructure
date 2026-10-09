@@ -1,0 +1,21 @@
+# Downloaded and generated data (~3.5 GB) - rebuild with `python ingest.py universe/download` and `python run_all.py`
+data/*
+!data/meta/
+data/meta/*
+!data/meta/universe.csv
+!data/meta/candidates.csv
+!data/meta/manifest.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Spark
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Office lock files
+~$*
