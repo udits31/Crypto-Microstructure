@@ -1,0 +1,48 @@
+== Physical Plan ==
+AdaptiveSparkPlan (7)
++- Project (6)
+   +- HashAggregate (5)
+      +- Exchange (4)
+         +- HashAggregate (3)
+            +- Filter (2)
+               +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [10]: [ts_us#35L, ts#36, open#37, close#38, volume#39, quote_volume#40, order_flow#47, amihud#48, week#50L, symbol#51]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/minute]
+PushedFilters: [IsNotNull(week), LessThan(week,13)]
+ReadSchema: struct<ts_us:bigint,ts:timestamp,open:double,close:double,volume:double,quote_volume:double,order_flow:double,amihud:double,week:bigint>
+
+(2) Filter
+Input [10]: [ts_us#35L, ts#36, open#37, close#38, volume#39, quote_volume#40, order_flow#47, amihud#48, week#50L, symbol#51]
+Condition : (isnotnull(week#50L) AND (week#50L < 13))
+
+(3) HashAggregate
+Input [10]: [ts_us#35L, ts#36, open#37, close#38, volume#39, quote_volume#40, order_flow#47, amihud#48, week#50L, symbol#51]
+Keys [2]: [symbol#51, week#50L]
+Functions [8]: [partial_min(ts#36), partial_count(1), partial_min_by(open#37, ts_us#35L), partial_max_by(close#38, ts_us#35L), partial_sum(quote_volume#40), partial_avg(amihud#48), partial_avg(cast((volume#39 = 0.0) as double)), partial_avg(order_flow#47)]
+Aggregate Attributes [13]: [min#87, count#88L, valueWithExtremumOrdering#89, extremumOrdering#90L, valueWithExtremumOrdering#91, extremumOrdering#92L, sum#93, sum#94, count#95L, sum#96, count#97L, sum#98, count#99L]
+Results [15]: [symbol#51, week#50L, min#100, count#101L, valueWithExtremumOrdering#102, extremumOrdering#103L, valueWithExtremumOrdering#104, extremumOrdering#105L, sum#106, sum#107, count#108L, sum#109, count#110L, sum#111, count#112L]
+
+(4) Exchange
+Input [15]: [symbol#51, week#50L, min#100, count#101L, valueWithExtremumOrdering#102, extremumOrdering#103L, valueWithExtremumOrdering#104, extremumOrdering#105L, sum#106, sum#107, count#108L, sum#109, count#110L, sum#111, count#112L]
+Arguments: hashpartitioning(symbol#51, week#50L, 32), ENSURE_REQUIREMENTS, [plan_id=159]
+
+(5) HashAggregate
+Input [15]: [symbol#51, week#50L, min#100, count#101L, valueWithExtremumOrdering#102, extremumOrdering#103L, valueWithExtremumOrdering#104, extremumOrdering#105L, sum#106, sum#107, count#108L, sum#109, count#110L, sum#111, count#112L]
+Keys [2]: [symbol#51, week#50L]
+Functions [8]: [min(ts#36), count(1), min_by(open#37, ts_us#35L), max_by(close#38, ts_us#35L), sum(quote_volume#40), avg(amihud#48), avg(cast((volume#39 = 0.0) as double)), avg(order_flow#47)]
+Aggregate Attributes [8]: [min(ts#36)#79, count(1)#78L, min_by(open#37, ts_us#35L)#80, max_by(close#38, ts_us#35L)#81, sum(quote_volume#40)#82, avg(amihud#48)#83, avg(cast((volume#39 = 0.0) as double))#85, avg(order_flow#47)#84]
+Results [10]: [symbol#51, week#50L, min(ts#36)#79 AS week_start#53, count(1)#78L AS minutes#54L, min_by(open#37, ts_us#35L)#80 AS open_first#55, max_by(close#38, ts_us#35L)#81 AS close_last#56, sum(quote_volume#40)#82 AS quote_volume#57, avg(amihud#48)#83 AS week_amihud#58, avg(cast((volume#39 = 0.0) as double))#85 AS zero_vol_frac#59, avg(order_flow#47)#84 AS mean_order_flow#60]
+
+(6) Project
+Output [11]: [symbol#51, week#50L, week_start#53, minutes#54L, open_first#55, close_last#56, quote_volume#57, week_amihud#58, zero_vol_frac#59, mean_order_flow#60, ((close_last#56 / open_first#55) - 1.0) AS week_ret#86]
+Input [10]: [symbol#51, week#50L, week_start#53, minutes#54L, open_first#55, close_last#56, quote_volume#57, week_amihud#58, zero_vol_frac#59, mean_order_flow#60]
+
+(7) AdaptiveSparkPlan
+Output [11]: [symbol#51, week#50L, week_start#53, minutes#54L, open_first#55, close_last#56, quote_volume#57, week_amihud#58, zero_vol_frac#59, mean_order_flow#60, week_ret#86]
+Arguments: isFinalPlan=false
+
+

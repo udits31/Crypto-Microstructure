@@ -1,0 +1,57 @@
+== Physical Plan ==
+AdaptiveSparkPlan (9)
++- Sort (8)
+   +- Exchange (7)
+      +- HashAggregate (6)
+         +- Exchange (5)
+            +- HashAggregate (4)
+               +- Project (3)
+                  +- Project (2)
+                     +- Scan csv  (1)
+
+
+(1) Scan csv 
+Output [12]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, file_name#119]
+Batched: false
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/csv/AAVEUSDT-1m-2026-07.csv, ... 296 entries]
+ReadSchema: struct<open_time:bigint,open:double,high:double,low:double,close:double,volume:double,close_time:bigint,quote_volume:double,num_trades:bigint,taker_buy_base:double,taker_buy_quote:double>
+
+(2) Project
+Output [12]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, knownnotnull(named_struct(file_name, file_name#119)) AS _metadata#12]
+Input [12]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, file_name#119]
+
+(3) Project
+Output [13]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, regexp_extract(_metadata#12.file_name, ^(.+)-1m-\d{4}-\d{2}\.csv$, 1) AS symbol#13, CASE WHEN (open_time#0L >= 1000000000000000) THEN open_time#0L ELSE (open_time#0L * 1000) END AS ts_us#16L]
+Input [12]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, _metadata#12]
+
+(4) HashAggregate
+Input [13]: [open_time#0L, open#1, high#2, low#3, close#4, volume#5, close_time#6L, quote_volume#7, num_trades#8L, taker_buy_base#9, taker_buy_quote#10, symbol#13, ts_us#16L]
+Keys [2]: [symbol#13, ts_us#16L]
+Functions [11]: [partial_first(open_time#0L, false), partial_first(open#1, false), partial_first(high#2, false), partial_first(low#3, false), partial_first(close#4, false), partial_first(volume#5, false), partial_first(close_time#6L, false), partial_first(quote_volume#7, false), partial_first(num_trades#8L, false), partial_first(taker_buy_base#9, false), partial_first(taker_buy_quote#10, false)]
+Aggregate Attributes [22]: [first#75L, valueSet#76, first#77, valueSet#78, first#79, valueSet#80, first#81, valueSet#82, first#83, valueSet#84, first#85, valueSet#86, first#87L, valueSet#88, first#89, valueSet#90, first#91L, valueSet#92, first#93, valueSet#94, first#95, valueSet#96]
+Results [24]: [symbol#13, ts_us#16L, first#97L, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108, first#109L, valueSet#110, first#111, valueSet#112, first#113L, valueSet#114, first#115, valueSet#116, first#117, valueSet#118]
+
+(5) Exchange
+Input [24]: [symbol#13, ts_us#16L, first#97L, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108, first#109L, valueSet#110, first#111, valueSet#112, first#113L, valueSet#114, first#115, valueSet#116, first#117, valueSet#118]
+Arguments: hashpartitioning(symbol#13, ts_us#16L, 32), ENSURE_REQUIREMENTS, [plan_id=68]
+
+(6) HashAggregate
+Input [24]: [symbol#13, ts_us#16L, first#97L, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108, first#109L, valueSet#110, first#111, valueSet#112, first#113L, valueSet#114, first#115, valueSet#116, first#117, valueSet#118]
+Keys [2]: [symbol#13, ts_us#16L]
+Functions [11]: [first(open_time#0L, false), first(open#1, false), first(high#2, false), first(low#3, false), first(close#4, false), first(volume#5, false), first(close_time#6L, false), first(quote_volume#7, false), first(num_trades#8L, false), first(taker_buy_base#9, false), first(taker_buy_quote#10, false)]
+Aggregate Attributes [11]: [first(open_time#0L)()#40L, first(open#1)()#42, first(high#2)()#44, first(low#3)()#46, first(close#4)()#48, first(volume#5)()#50, first(close_time#6L)()#52L, first(quote_volume#7)()#54, first(num_trades#8L)()#56L, first(taker_buy_base#9)()#58, first(taker_buy_quote#10)()#60]
+Results [13]: [first(open_time#0L)()#40L AS open_time#41L, first(open#1)()#42 AS open#43, first(high#2)()#44 AS high#45, first(low#3)()#46 AS low#47, first(close#4)()#48 AS close#49, first(volume#5)()#50 AS volume#51, first(close_time#6L)()#52L AS close_time#53L, first(quote_volume#7)()#54 AS quote_volume#55, first(num_trades#8L)()#56L AS num_trades#57L, first(taker_buy_base#9)()#58 AS taker_buy_base#59, first(taker_buy_quote#10)()#60 AS taker_buy_quote#61, symbol#13, ts_us#16L]
+
+(7) Exchange
+Input [13]: [open_time#41L, open#43, high#45, low#47, close#49, volume#51, close_time#53L, quote_volume#55, num_trades#57L, taker_buy_base#59, taker_buy_quote#61, symbol#13, ts_us#16L]
+Arguments: hashpartitioning(symbol#13, 32), REPARTITION_BY_COL, [plan_id=70]
+
+(8) Sort
+Input [13]: [open_time#41L, open#43, high#45, low#47, close#49, volume#51, close_time#53L, quote_volume#55, num_trades#57L, taker_buy_base#59, taker_buy_quote#61, symbol#13, ts_us#16L]
+Arguments: [symbol#13 ASC NULLS FIRST, ts_us#16L ASC NULLS FIRST], false, 0
+
+(9) AdaptiveSparkPlan
+Output [13]: [open_time#41L, open#43, high#45, low#47, close#49, volume#51, close_time#53L, quote_volume#55, num_trades#57L, taker_buy_base#59, taker_buy_quote#61, symbol#13, ts_us#16L]
+Arguments: isFinalPlan=false
+
+

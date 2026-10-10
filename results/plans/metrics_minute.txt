@@ -1,0 +1,46 @@
+== Physical Plan ==
+AdaptiveSparkPlan (8)
++- Project (7)
+   +- Project (6)
+      +- Window (5)
+         +- Sort (4)
+            +- Exchange (3)
+               +- Project (2)
+                  +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [8]: [open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9, ts_us#11L, symbol#12]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/klines]
+ReadSchema: struct<open:double,close:double,volume:double,quote_volume:double,num_trades:bigint,taker_buy_base:double,ts_us:bigint>
+
+(2) Project
+Output [9]: [symbol#12, ts_us#11L, timestamp_micros(ts_us#11L) AS ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9]
+Input [8]: [open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9, ts_us#11L, symbol#12]
+
+(3) Exchange
+Input [9]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9]
+Arguments: hashpartitioning(symbol#12, 32), ENSURE_REQUIREMENTS, [plan_id=18]
+
+(4) Sort
+Input [9]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9]
+Arguments: [symbol#12 ASC NULLS FIRST, ts_us#11L ASC NULLS FIRST], false, 0
+
+(5) Window
+Input [9]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9]
+Arguments: [lag(ts_us#11L, -1, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS _we0#19L, lag(close#4, -1, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS _we1#20, lead(ts_us#11L, 1, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 1, 1)) AS _we2#21L, lead(close#4, 1, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 1, 1)) AS _we3#22, lead(ts_us#11L, 5, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 5, 5)) AS _we4#23L, lead(close#4, 5, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 5, 5)) AS _we5#24, lead(ts_us#11L, 30, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 30, 30)) AS _we6#25L, lead(close#4, 30, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 30, 30)) AS _we7#26, lead(ts_us#11L, 60, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 60, 60)) AS _we8#27L, lead(close#4, 60, null) windowspecdefinition(symbol#12, ts_us#11L ASC NULLS FIRST, specifiedwindowframe(RowFrame, 60, 60)) AS _we9#28], [symbol#12], [ts_us#11L ASC NULLS FIRST]
+
+(6) Project
+Output [14]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, CASE WHEN ((ts_us#11L - _we0#19L) = 60000000) THEN ((close#4 / _we1#20) - 1.0) END AS ret#14, CASE WHEN ((_we2#21L - ts_us#11L) = 60000000) THEN ((_we3#22 / close#4) - 1.0) END AS fwd_ret_1#15, CASE WHEN ((_we4#23L - ts_us#11L) = 300000000) THEN ((_we5#24 / close#4) - 1.0) END AS fwd_ret_5#16, CASE WHEN ((_we6#25L - ts_us#11L) = 1800000000) THEN ((_we7#26 / close#4) - 1.0) END AS fwd_ret_30#17, CASE WHEN ((_we8#27L - ts_us#11L) = 3600000000) THEN ((_we9#28 / close#4) - 1.0) END AS fwd_ret_60#18, (((taker_buy_base#9 * 2.0) / CASE WHEN (volume#5 > 0.0) THEN volume#5 END) - 1.0) AS order_flow#30]
+Input [19]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, taker_buy_base#9, _we0#19L, _we1#20, _we2#21L, _we3#22, _we4#23L, _we5#24, _we6#25L, _we7#26, _we8#27L, _we9#28]
+
+(7) Project
+Output [17]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, ret#14, fwd_ret_1#15, fwd_ret_5#16, fwd_ret_30#17, fwd_ret_60#18, order_flow#30, (abs(ret#14) / CASE WHEN (quote_volume#7 > 0.0) THEN quote_volume#7 END) AS amihud#31, (volume#5 / CASE WHEN (num_trades#8L > 0) THEN cast(num_trades#8L as double) END) AS avg_trade_sz#32, FLOOR((cast((ts_us#11L - 1782864000000000) as double) / 6.048E11)) AS week#33L]
+Input [14]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, ret#14, fwd_ret_1#15, fwd_ret_5#16, fwd_ret_30#17, fwd_ret_60#18, order_flow#30]
+
+(8) AdaptiveSparkPlan
+Output [17]: [symbol#12, ts_us#11L, ts#13, open#1, close#4, volume#5, quote_volume#7, num_trades#8L, ret#14, fwd_ret_1#15, fwd_ret_5#16, fwd_ret_30#17, fwd_ret_60#18, order_flow#30, amihud#31, avg_trade_sz#32, week#33L]
+Arguments: isFinalPlan=false
+
+
