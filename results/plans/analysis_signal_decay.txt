@@ -1,0 +1,61 @@
+== Physical Plan ==
+AdaptiveSparkPlan (10)
++- HashAggregate (9)
+   +- Exchange (8)
+      +- HashAggregate (7)
+         +- InMemoryTableScan (1)
+               +- InMemoryRelation (2)
+                     +- * Project (6)
+                        +- * Filter (5)
+                           +- * ColumnarToRow (4)
+                              +- Scan parquet  (3)
+
+
+(1) InMemoryTableScan
+Output [7]: [symbol#16, order_flow#12, ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11]
+Arguments: [symbol#16, order_flow#12, ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11]
+
+(2) InMemoryRelation
+Arguments: [symbol#16, order_flow#12, ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11], StorageLevel(disk, memory, deserialized, 1 replicas)
+
+(3) Scan parquet 
+Output [7]: [ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11, order_flow#12, symbol#16]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/minute]
+PushedFilters: [IsNotNull(order_flow)]
+ReadSchema: struct<ret:double,fwd_ret_1:double,fwd_ret_5:double,fwd_ret_30:double,fwd_ret_60:double,order_flow:double>
+
+(4) ColumnarToRow [codegen id : 1]
+Input [7]: [ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11, order_flow#12, symbol#16]
+
+(5) Filter [codegen id : 1]
+Input [7]: [ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11, order_flow#12, symbol#16]
+Condition : isnotnull(order_flow#12)
+
+(6) Project [codegen id : 1]
+Output [7]: [symbol#16, order_flow#12, ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11]
+Input [7]: [ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11, order_flow#12, symbol#16]
+
+(7) HashAggregate
+Input [7]: [symbol#16, order_flow#12, ret#7, fwd_ret_1#8, fwd_ret_5#9, fwd_ret_30#10, fwd_ret_60#11]
+Keys [1]: [symbol#16]
+Functions [15]: [partial_corr(order_flow#12, ret#7), partial_regr_slope(ret#7, order_flow#12), partial_count(ret#7), partial_corr(order_flow#12, fwd_ret_1#8), partial_regr_slope(fwd_ret_1#8, order_flow#12), partial_count(fwd_ret_1#8), partial_corr(order_flow#12, fwd_ret_5#9), partial_regr_slope(fwd_ret_5#9, order_flow#12), partial_count(fwd_ret_5#9), partial_corr(order_flow#12, fwd_ret_30#10), partial_regr_slope(fwd_ret_30#10, order_flow#12), partial_count(fwd_ret_30#10), partial_corr(order_flow#12, fwd_ret_60#11), partial_regr_slope(fwd_ret_60#11, order_flow#12), partial_count(fwd_ret_60#11)]
+Aggregate Attributes [70]: [n#75, xAvg#76, yAvg#77, ck#78, xMk#79, yMk#80, n#88, xAvg#89, yAvg#90, ck#91, n#96, avg#97, m2#98, count#755L, n#106, xAvg#107, yAvg#108, ck#109, xMk#110, yMk#111, n#119, xAvg#120, yAvg#121, ck#122, n#127, avg#128, m2#129, count#756L, n#137, xAvg#138, yAvg#139, ck#140, xMk#141, yMk#142, n#150, xAvg#151, yAvg#152, ck#153, n#158, avg#159, m2#160, count#757L, n#168, xAvg#169, yAvg#170, ck#171, xMk#172, yMk#173, n#181, xAvg#182, yAvg#183, ck#184, n#189, avg#190, m2#191, count#758L, n#199, xAvg#200, yAvg#201, ck#202, xMk#203, yMk#204, n#212, xAvg#213, yAvg#214, ck#215, n#220, avg#221, m2#222, count#759L]
+Results [71]: [symbol#16, n#81, xAvg#82, yAvg#83, ck#84, xMk#85, yMk#86, n#92, xAvg#93, yAvg#94, ck#95, n#101, avg#102, m2#103, count#760L, n#112, xAvg#113, yAvg#114, ck#115, xMk#116, yMk#117, n#123, xAvg#124, yAvg#125, ck#126, n#132, avg#133, m2#134, count#761L, n#143, xAvg#144, yAvg#145, ck#146, xMk#147, yMk#148, n#154, xAvg#155, yAvg#156, ck#157, n#163, avg#164, m2#165, count#762L, n#174, xAvg#175, yAvg#176, ck#177, xMk#178, yMk#179, n#185, xAvg#186, yAvg#187, ck#188, n#194, avg#195, m2#196, count#763L, n#205, xAvg#206, yAvg#207, ck#208, xMk#209, yMk#210, n#216, xAvg#217, yAvg#218, ck#219, n#225, avg#226, m2#227, count#764L]
+
+(8) Exchange
+Input [71]: [symbol#16, n#81, xAvg#82, yAvg#83, ck#84, xMk#85, yMk#86, n#92, xAvg#93, yAvg#94, ck#95, n#101, avg#102, m2#103, count#760L, n#112, xAvg#113, yAvg#114, ck#115, xMk#116, yMk#117, n#123, xAvg#124, yAvg#125, ck#126, n#132, avg#133, m2#134, count#761L, n#143, xAvg#144, yAvg#145, ck#146, xMk#147, yMk#148, n#154, xAvg#155, yAvg#156, ck#157, n#163, avg#164, m2#165, count#762L, n#174, xAvg#175, yAvg#176, ck#177, xMk#178, yMk#179, n#185, xAvg#186, yAvg#187, ck#188, n#194, avg#195, m2#196, count#763L, n#205, xAvg#206, yAvg#207, ck#208, xMk#209, yMk#210, n#216, xAvg#217, yAvg#218, ck#219, n#225, avg#226, m2#227, count#764L]
+Arguments: hashpartitioning(symbol#16, 32), ENSURE_REQUIREMENTS, [plan_id=26]
+
+(9) HashAggregate
+Input [71]: [symbol#16, n#81, xAvg#82, yAvg#83, ck#84, xMk#85, yMk#86, n#92, xAvg#93, yAvg#94, ck#95, n#101, avg#102, m2#103, count#760L, n#112, xAvg#113, yAvg#114, ck#115, xMk#116, yMk#117, n#123, xAvg#124, yAvg#125, ck#126, n#132, avg#133, m2#134, count#761L, n#143, xAvg#144, yAvg#145, ck#146, xMk#147, yMk#148, n#154, xAvg#155, yAvg#156, ck#157, n#163, avg#164, m2#165, count#762L, n#174, xAvg#175, yAvg#176, ck#177, xMk#178, yMk#179, n#185, xAvg#186, yAvg#187, ck#188, n#194, avg#195, m2#196, count#763L, n#205, xAvg#206, yAvg#207, ck#208, xMk#209, yMk#210, n#216, xAvg#217, yAvg#218, ck#219, n#225, avg#226, m2#227, count#764L]
+Keys [1]: [symbol#16]
+Functions [15]: [corr(order_flow#12, ret#7), regr_slope(ret#7, order_flow#12), count(ret#7), corr(order_flow#12, fwd_ret_1#8), regr_slope(fwd_ret_1#8, order_flow#12), count(fwd_ret_1#8), corr(order_flow#12, fwd_ret_5#9), regr_slope(fwd_ret_5#9, order_flow#12), count(fwd_ret_5#9), corr(order_flow#12, fwd_ret_30#10), regr_slope(fwd_ret_30#10, order_flow#12), count(fwd_ret_30#10), corr(order_flow#12, fwd_ret_60#11), regr_slope(fwd_ret_60#11, order_flow#12), count(fwd_ret_60#11)]
+Aggregate Attributes [15]: [corr(order_flow#12, ret#7)#87, regr_slope(ret#7, order_flow#12)#104, count(ret#7)#105L, corr(order_flow#12, fwd_ret_1#8)#118, regr_slope(fwd_ret_1#8, order_flow#12)#135, count(fwd_ret_1#8)#136L, corr(order_flow#12, fwd_ret_5#9)#149, regr_slope(fwd_ret_5#9, order_flow#12)#166, count(fwd_ret_5#9)#167L, corr(order_flow#12, fwd_ret_30#10)#180, regr_slope(fwd_ret_30#10, order_flow#12)#197, count(fwd_ret_30#10)#198L, corr(order_flow#12, fwd_ret_60#11)#211, regr_slope(fwd_ret_60#11, order_flow#12)#228, count(fwd_ret_60#11)#229L]
+Results [16]: [symbol#16, corr(order_flow#12, ret#7)#87 AS corr_0#53, regr_slope(ret#7, order_flow#12)#104 AS beta_0#54, count(ret#7)#105L AS n_0#55L, corr(order_flow#12, fwd_ret_1#8)#118 AS corr_1#56, regr_slope(fwd_ret_1#8, order_flow#12)#135 AS beta_1#57, count(fwd_ret_1#8)#136L AS n_1#58L, corr(order_flow#12, fwd_ret_5#9)#149 AS corr_5#59, regr_slope(fwd_ret_5#9, order_flow#12)#166 AS beta_5#60, count(fwd_ret_5#9)#167L AS n_5#61L, corr(order_flow#12, fwd_ret_30#10)#180 AS corr_30#62, regr_slope(fwd_ret_30#10, order_flow#12)#197 AS beta_30#63, count(fwd_ret_30#10)#198L AS n_30#64L, corr(order_flow#12, fwd_ret_60#11)#211 AS corr_60#65, regr_slope(fwd_ret_60#11, order_flow#12)#228 AS beta_60#66, count(fwd_ret_60#11)#229L AS n_60#67L]
+
+(10) AdaptiveSparkPlan
+Output [16]: [symbol#16, corr_0#53, beta_0#54, n_0#55L, corr_1#56, beta_1#57, n_1#58L, corr_5#59, beta_5#60, n_5#61L, corr_30#62, beta_30#63, n_30#64L, corr_60#65, beta_60#66, n_60#67L]
+Arguments: isFinalPlan=false
+
+
