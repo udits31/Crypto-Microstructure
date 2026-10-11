@@ -1,0 +1,7 @@
+format,query,wall_s,wall_min_s,scan_partitions,tasks,spark_input_metric_mb,input_rows,scanned_mb,on_disk_mb
+csv,count_all,1.856,1.75,23,24.0,1783.37,13115574.0,1783.37,1783.37
+csv,flow_by_symbol,7.429,7.071,23,24.0,1783.37,13115574.0,1783.37,1783.37
+csv,one_symbol,0.213,0.186,23,7.0,20.708,132480.0,20.512,1783.37
+parquet,count_all,0.182,0.133,12,13.0,0.724,13115520.0,0.0,634.157
+parquet,flow_by_symbol,0.794,0.62,12,13.0,0.724,13115520.0,214.001,634.157
+parquet,one_symbol,0.082,0.068,12,4.0,0.022,132480.0,0.705,634.157

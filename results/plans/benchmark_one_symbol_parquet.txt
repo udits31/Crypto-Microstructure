@@ -1,0 +1,21 @@
+== Physical Plan ==
+* Project (3)
++- * ColumnarToRow (2)
+   +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [2]: [close#71, symbol#79]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/klines]
+PartitionFilters: [isnotnull(symbol#79), (symbol#79 = BTCUSDT)]
+ReadSchema: struct<close:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [2]: [close#71, symbol#79]
+
+(3) Project [codegen id : 1]
+Output [1]: [close#71]
+Input [2]: [close#71, symbol#79]
+
+
