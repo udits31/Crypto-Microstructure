@@ -1,0 +1,103 @@
+== Physical Plan ==
+AdaptiveSparkPlan (17)
++- Sort (16)
+   +- Exchange (15)
+      +- HashAggregate (14)
+         +- HashAggregate (13)
+            +- Project (12)
+               +- BroadcastHashJoin Inner BuildRight (11)
+                  :- Filter (6)
+                  :  +- Window (5)
+                  :     +- Sort (4)
+                  :        +- Exchange (3)
+                  :           +- Filter (2)
+                  :              +- Scan parquet  (1)
+                  +- BroadcastExchange (10)
+                     +- Project (9)
+                        +- Filter (8)
+                           +- Scan parquet  (7)
+
+
+(1) Scan parquet 
+Output [3]: [symbol#3327, week#3328L, week_amihud#3334]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/weekly]
+PushedFilters: [IsNotNull(week), LessThan(week,12), IsNotNull(week_amihud)]
+ReadSchema: struct<symbol:string,week:bigint,week_amihud:double>
+
+(2) Filter
+Input [3]: [symbol#3327, week#3328L, week_amihud#3334]
+Condition : ((isnotnull(week#3328L) AND (week#3328L < 12)) AND isnotnull(week_amihud#3334))
+
+(3) Exchange
+Input [3]: [symbol#3327, week#3328L, week_amihud#3334]
+Arguments: hashpartitioning(week#3328L, 32), ENSURE_REQUIREMENTS, [plan_id=206]
+
+(4) Sort
+Input [3]: [symbol#3327, week#3328L, week_amihud#3334]
+Arguments: [week#3328L ASC NULLS FIRST, week_amihud#3334 ASC NULLS FIRST, symbol#3327 ASC NULLS FIRST], false, 0
+
+(5) Window
+Input [3]: [symbol#3327, week#3328L, week_amihud#3334]
+Arguments: [ntile(5) windowspecdefinition(week#3328L, week_amihud#3334 ASC NULLS FIRST, symbol#3327 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS quintile#3356], [week#3328L], [week_amihud#3334 ASC NULLS FIRST, symbol#3327 ASC NULLS FIRST]
+
+(6) Filter
+Input [4]: [symbol#3327, week#3328L, week_amihud#3334, quintile#3356]
+Condition : isnotnull(symbol#3327)
+
+(7) Scan parquet 
+Output [3]: [symbol#3365, week#3366L, week_ret#3375]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/weekly]
+PushedFilters: [IsNotNull(symbol)]
+ReadSchema: struct<symbol:string,week:bigint,week_ret:double>
+
+(8) Filter
+Input [3]: [symbol#3365, week#3366L, week_ret#3375]
+Condition : ((((week#3366L - 1) < 12) AND isnotnull(symbol#3365)) AND isnotnull((week#3366L - 1)))
+
+(9) Project
+Output [3]: [symbol#3365, (week#3366L - 1) AS week#3363L, week_ret#3375 AS next_ret#3364]
+Input [3]: [symbol#3365, week#3366L, week_ret#3375]
+
+(10) BroadcastExchange
+Input [3]: [symbol#3365, week#3363L, next_ret#3364]
+Arguments: HashedRelationBroadcastMode(List(input[0, string, true], input[1, bigint, true]),false), [plan_id=211]
+
+(11) BroadcastHashJoin
+Left keys [2]: [symbol#3327, week#3328L]
+Right keys [2]: [symbol#3365, week#3363L]
+Join type: Inner
+Join condition: None
+
+(12) Project
+Output [4]: [week#3328L, week_amihud#3334, quintile#3356, next_ret#3364]
+Input [7]: [symbol#3327, week#3328L, week_amihud#3334, quintile#3356, symbol#3365, week#3363L, next_ret#3364]
+
+(13) HashAggregate
+Input [4]: [week#3328L, week_amihud#3334, quintile#3356, next_ret#3364]
+Keys [2]: [week#3328L, quintile#3356]
+Functions [3]: [partial_avg(next_ret#3364), partial_count(1), partial_avg(week_amihud#3334)]
+Aggregate Attributes [5]: [sum#3396, count#3397L, count#3398L, sum#3399, count#3400L]
+Results [7]: [week#3328L, quintile#3356, sum#3401, count#3402L, count#3403L, sum#3404, count#3405L]
+
+(14) HashAggregate
+Input [7]: [week#3328L, quintile#3356, sum#3401, count#3402L, count#3403L, sum#3404, count#3405L]
+Keys [2]: [week#3328L, quintile#3356]
+Functions [3]: [avg(next_ret#3364), count(1), avg(week_amihud#3334)]
+Aggregate Attributes [3]: [avg(next_ret#3364)#3394, count(1)#3393L, avg(week_amihud#3334)#3395]
+Results [5]: [week#3328L, quintile#3356, avg(next_ret#3364)#3394 AS ret#3377, count(1)#3393L AS n_coins#3378L, avg(week_amihud#3334)#3395 AS avg_sort_value#3379]
+
+(15) Exchange
+Input [5]: [week#3328L, quintile#3356, ret#3377, n_coins#3378L, avg_sort_value#3379]
+Arguments: rangepartitioning(week#3328L ASC NULLS FIRST, quintile#3356 ASC NULLS FIRST, 32), ENSURE_REQUIREMENTS, [plan_id=217]
+
+(16) Sort
+Input [5]: [week#3328L, quintile#3356, ret#3377, n_coins#3378L, avg_sort_value#3379]
+Arguments: [week#3328L ASC NULLS FIRST, quintile#3356 ASC NULLS FIRST], true, 0
+
+(17) AdaptiveSparkPlan
+Output [5]: [week#3328L, quintile#3356, ret#3377, n_coins#3378L, avg_sort_value#3379]
+Arguments: isFinalPlan=false
+
+
