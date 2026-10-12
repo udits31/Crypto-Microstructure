@@ -1,0 +1,42 @@
+== Physical Plan ==
+ObjectHashAggregate (6)
++- ObjectHashAggregate (5)
+   +- Exchange (4)
+      +- * Filter (3)
+         +- * ColumnarToRow (2)
+            +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [3]: [amihud#13, week#15L, symbol#16]
+Batched: true
+Location: InMemoryFileIndex [file:/D:/NMIMS/Sem 11/BDA/project/data/parquet/minute]
+PushedFilters: [IsNotNull(week), LessThan(week,13)]
+ReadSchema: struct<amihud:double,week:bigint>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [3]: [amihud#13, week#15L, symbol#16]
+
+(3) Filter [codegen id : 1]
+Input [3]: [amihud#13, week#15L, symbol#16]
+Condition : (isnotnull(week#15L) AND (week#15L < 13))
+
+(4) Exchange
+Input [3]: [amihud#13, week#15L, symbol#16]
+Arguments: hashpartitioning(symbol#16, week#15L, 32), REPARTITION_BY_NUM, [plan_id=167]
+
+(5) ObjectHashAggregate
+Input [3]: [amihud#13, week#15L, symbol#16]
+Keys [2]: [symbol#16, week#15L]
+Functions [3]: [partial_avg(amihud#13), partial_percentile_approx(amihud#13, 0.5, 1000, 0, 0), partial_count(1)]
+Aggregate Attributes [4]: [sum#198, count#199L, buf#200, count#201L]
+Results [6]: [symbol#16, week#15L, sum#202, count#203L, buf#204, count#205L]
+
+(6) ObjectHashAggregate
+Input [6]: [symbol#16, week#15L, sum#202, count#203L, buf#204, count#205L]
+Keys [2]: [symbol#16, week#15L]
+Functions [3]: [avg(amihud#13), percentile_approx(amihud#13, 0.5, 1000, 0, 0), count(1)]
+Aggregate Attributes [3]: [avg(amihud#13)#196, percentile_approx(amihud#13, 0.5, 1000, 0, 0)#197, count(1)#195L]
+Results [5]: [symbol#16, week#15L, avg(amihud#13)#196 AS week_amihud#175, percentile_approx(amihud#13, 0.5, 1000, 0, 0)#197 AS median_amihud#176, count(1)#195L AS minutes#177L]
+
+

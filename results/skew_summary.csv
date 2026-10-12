@@ -1,0 +1,3 @@
+variant,partition_keys,job_wall_s,stage_tasks,tasks_with_data,max_task_s,median_task_s,max_task_records,mean_task_records,max_over_mean_records
+before,week,7.271625599999879,32,9,5.639,0.0225,2993760,405405.0,7.384615384615385
+after,"symbol, week",7.56172800000013,32,32,2.034,1.486,544320,405405.0,1.3426573426573427
